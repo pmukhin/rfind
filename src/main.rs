@@ -1,5 +1,3 @@
-#![feature(let_chains)]
-
 mod config;
 
 use crate::config::{FindType, SizeType};
@@ -100,8 +98,10 @@ impl Find {
     }
 
     fn inspect_dir(&mut self, path: &Path) {
-        if let Some(depth) = self.config.depth && self.depth == depth {
-            return;
+        if let Some(depth) = self.config.depth {
+            if self.depth == depth {
+                return;
+            }
         }
 
         self.depth += 1;
