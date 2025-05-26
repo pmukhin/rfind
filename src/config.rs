@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 use clap::Parser;
 use regex::Regex;
 use std::process::exit;
+use crate::print_error;
 
 #[derive(PartialEq, Debug)]
 pub enum FindType {
@@ -102,14 +103,14 @@ impl Config {
         } else if raw_config.find_type == "s" {
             config.find_type = FindType::Symlink;
         } else if raw_config.find_type != "f" {
-            eprintln!("unknown type: {}", raw_config.find_type);
+            print_error!("unknown type: {}", raw_config.find_type);
             exit(1)
         }
 
         if let Some(size) = raw_config.size {
             let st = SizeType::parse(&size);
             if st.is_err() {
-                eprintln!("unknown size type: {}", size);
+                print_error!("unknown size type: {}", size);
                 exit(1);
             }
             config.size_in_bytes = Some(st.unwrap());
@@ -121,14 +122,14 @@ impl Config {
             let matcher_result =
                 create_name_matcher(raw_config.regex, raw_config.name, raw_config.iname);
             if matcher_result.is_err() {
-                eprintln!("name matcher can't be decoded: {:?}", matcher_result.unwrap_err());
+                print_error!("name matcher can't be decoded: {:?}", matcher_result.unwrap_err());
                 exit(1);
             }
             config.regex = Some(matcher_result.unwrap());
         }
         if let Some(depth) = raw_config.depth {
             if depth == 0 {
-                eprintln!("depth should be >0");
+                print_error!("depth should be >0");
                 exit(1);
             }
             config.depth = Some(depth);
