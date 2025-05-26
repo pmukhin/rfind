@@ -38,6 +38,10 @@ struct Find {
 }
 
 impl Find {
+    fn new(config: Config) -> Self {
+        Self { config, depth: 0 }
+    }
+
     fn match_name(&self, path: &Path) -> bool {
         match &self.config.regex {
             None => true,
@@ -128,11 +132,7 @@ fn main() {
     }
 
     let root_path = config.dir.clone();
-
-    let mut find = Find {
-        config,
-        depth: 0,
-    };
+    let mut find = Find::new(config);
 
     find.run(&root_path);
 }
@@ -141,8 +141,20 @@ fn main() {
 mod tests {
     use std::fs;
     use std::os::unix;
-    use crate::{get_type, PathType};
+    use crate::{get_type, Find, PathType};
     use std::path::PathBuf;
+    use regex::Regex;
+    use crate::config::Config;
+
+    #[test]
+    fn test_match_name() {
+        let mut config = Config::default();
+        config.regex = Some(Regex::new("^(.*).rs$").unwrap());
+        let find = Find::new(config);
+
+        assert_eq!(find.match_name(&PathBuf::from("./src/main.rs")), true);
+        assert_eq!(find.match_name(&PathBuf::from("./src/config.rs")), true);
+    }
 
     #[test]
     fn test_get_type() {
